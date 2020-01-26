@@ -1,45 +1,39 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
 import AddPerson from '../components/AddPerson/AddPerson';
 import Person from '../components/Person/Person';
+import * as actionTypes from '../store/actions';
+
 
 class Persons extends Component {
-
-    state = {
-        persons: []
-    }
-
-    onAddedPerson = (name, age) => {
-        const newPerson = {
-            id: Math.random(), // not really unique but good enough here!
-            name: name,
-            age: age
-        }
-        const persons = [...this.state.persons];
-        persons.push(newPerson);
-        this.setState({persons: persons});
-    }
-
-    onRemovedPerson = (id) => {
-        const persons = [...this.state.persons];
-        this.setState({
-            persons: persons.filter(person => person.id !== id)
-        })
-    }
 
     render() {
         return(
             <div>
-                <AddPerson personAdded={(name, age) => this.onAddedPerson(name, age)}/>
-                {this.state.persons.map(person => (
+                <AddPerson personAdded={this.props.onAddedPerson}/>
+                {this.props.prs.map(person => (
                     <Person 
                         key={person.id}
                         name={person.name} 
                         age={person.age}
-                        clicked={() => this.onRemovedPerson(person.id)} />
+                        clicked={() => this.props.onRemovedPerson(person.id)} />
                 ))}
             </div>
         );
     }
 }
 
-export default Persons;
+const mapStateToProps = state => {
+    return {
+        prs: state.persons
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddedPerson: (name, age) => dispatch({type: actionTypes.ADD_PERSON, personData: {name: name, age: age}}),
+        onRemovedPerson: (id) => dispatch({type: actionTypes.REMOVE_PERSON, id})
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Persons);
